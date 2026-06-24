@@ -9,7 +9,10 @@
     "start": "bun run src/index.ts",
     "build": "bun build src/index.ts --outdir ./dist --target bun",
     "test": "bun test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "migrate": "bun run scripts/migrate.ts",
+    "seed": "bun run scripts/seed.ts",
+    "reset-db": "bun run scripts/reset-database.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
