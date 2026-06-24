@@ -33,3 +33,11 @@ bun run seed
 ## Cleanup
 
 When done: `git worktree remove .worktrees/<name>`
+
+## APEX -b workflow
+
+- When `/apex -b` is called (the `-b` flag creates a new branch):
+  - **ALWAYS** first create a worktree from `main`: `git worktree add .worktrees/<branch-name> main`
+  - Then create the feature branch inside the worktree: `git checkout -b feat/<task-id>`
+  - Work and commit inside the worktree
+  - Never branch from inside another worktree — always start from `main`
