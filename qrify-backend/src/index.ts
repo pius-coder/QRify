@@ -4,6 +4,7 @@ import { logger } from 'hono/logger'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { env } from './config/env'
 import { ApiError, NotFoundError, formatErrorResponse } from './utils/errors'
+import { createAuthRouter } from './modules/auth/auth.routes'
 
 const app = new Hono()
 
@@ -22,6 +23,8 @@ app.get('/api/v1/health', (c) => {
     },
   })
 })
+
+app.route('/api/v1/auth', createAuthRouter())
 
 app.onError((err, c) => {
   console.error('Unexpected error:', err)
