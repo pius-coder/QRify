@@ -228,6 +228,32 @@ Attendance tracking app with multi-tenant QR code scanning.
 - Loading indicator ("Updating...") shown during status mutations
 - PATCH method used for status changes via `apiPatch` helper
 
+## Super Admin Module (Backend)
+
+### API Endpoints (`/api/v1/super-admin`)
+| Endpoint | Auth | Description |
+|----------|------|-------------|
+| `GET /companies` | SUPER_ADMIN | Lists companies with search, status filter, pagination |
+| `GET /companies/:id` | SUPER_ADMIN | Returns company detail |
+| `PATCH /companies/:id/status` | SUPER_ADMIN | Updates company status (ACTIVE↔SUSPENDED) |
+| `GET /statistics` | SUPER_ADMIN | Returns aggregate platform statistics |
+
+### Module Files
+| File | Purpose |
+|------|---------|
+| `src/modules/super-admin/super-admin.types.ts` | `CompanyListResponse`, `CompanyDetailResponse`, `UpdateCompanyStatusDTO`, `SuperAdminStatisticsResponse`, `PaginationMeta`, mapper functions |
+| `src/modules/super-admin/super-admin.errors.ts` | `SuperAdminCompanyNotFoundError`, `InvalidCompanyStatusTransitionError` |
+| `src/modules/super-admin/super-admin.schema.ts` | Zod schemas for status update and query params |
+| `src/modules/super-admin/super-admin.service.ts` | `SuperAdminService` with list, get, updateStatus, getStatistics |
+| `src/modules/super-admin/super-admin.routes.ts` | `createSuperAdminRouter(dbOverride?)` factory |
+
+### Key Behaviors
+- Only SUPER_ADMIN role can access all endpoints
+- `CompanyRepository.searchCompanies()` supports dynamic WHERE with LIKE for name/code, status filter, LIMIT/OFFSET pagination
+- Status transitions validated: ACTIVE↔SUSPENDED only; no-op returns current data
+- Statistics use aggregate COUNT queries across companies, users, scan_events, attendance_records
+- `searchCompanies` added to `CompanyRepository` contract + `SqliteCompanyRepository` implementation
+
 ## Work Schedule Module (Frontend)
 
 ### API Endpoints Consumed (`/api/v1/company/schedule`)
