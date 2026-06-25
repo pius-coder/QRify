@@ -5,6 +5,11 @@ import type { AttendanceData, AttendanceRepository } from '../contracts/attendan
 export class SqliteAttendanceRepository implements AttendanceRepository {
   constructor(private db: DatabaseAdapter) {}
 
+  async findById(id: string): Promise<AttendanceData | null> {
+    const { rows } = this.db.query<AttendanceData>('SELECT * FROM attendance_records WHERE id = ?', [id])
+    return rows[0] ?? null
+  }
+
   async findByUserAndDate(userId: string, workDate: string): Promise<AttendanceData | null> {
     const { rows } = this.db.query<AttendanceData>('SELECT * FROM attendance_records WHERE user_id = ? AND work_date = ?', [userId, workDate])
     return rows[0] ?? null
