@@ -5,6 +5,7 @@ import type { UserRepository } from '../../database/repositories/contracts/user.
 import type { CompanyRepository } from '../../database/repositories/contracts/company.repository'
 import type { DatabaseAdapter } from '../../database/database.types'
 import { ClockService } from '../../services/clock.service'
+import type { AttendanceService } from '../attendances/attendances.service'
 import type { SubmitScanDTO, ScanResponse } from './scans.types'
 import { toScanResponse } from './scans.types'
 import {
@@ -34,6 +35,7 @@ export class ScanService {
     private userRepo: UserRepository,
     private companyRepo: CompanyRepository,
     private clockService: ClockService,
+    private attendanceService?: AttendanceService,
   ) {}
 
   async processScan(userId: string, companyId: string, dto: SubmitScanDTO): Promise<ScanResponse> {
@@ -75,7 +77,9 @@ export class ScanService {
     }
 
     const scannedAt = now.toISOString()
-    const result = this.db.transaction(() => {
+    let attendanceId: string | undefined
+
+    const scanEvent = this.db.transaction(() => {
       const existing = this.db.query<{ result: string }>(
         "SELECT result FROM scan_events WHERE user_id = ? AND event_type = ? AND date(scanned_at) = ? AND result = 'ACCEPTED' LIMIT 1",
         [userId, session.event_type, session.work_date],
@@ -103,15 +107,17 @@ export class ScanService {
         ).rows[0]
 
         if (existingRecord) {
+          attendanceId = existingRecord.id
           this.db.run(
             `UPDATE attendance_records SET ${field} = ?, status = 'PRESENT', updated_at = datetime('now') WHERE id = ?`,
             [scannedAt, existingRecord.id],
           )
         } else if (session.event_type === 'ARRIVAL') {
+          attendanceId = randomUUID()
           this.db.run(
             `INSERT INTO attendance_records (id, company_id, user_id, work_date, arrival_at, status, late_minutes, break_minutes, worked_minutes, overtime_minutes)
              VALUES (?, ?, ?, ?, ?, 'PRESENT', 0, 0, 0, 0)`,
-            [randomUUID(), companyId, userId, session.work_date, scannedAt],
+            [attendanceId, companyId, userId, session.work_date, scannedAt],
           )
         }
       }
@@ -123,7 +129,15 @@ export class ScanService {
       return rows[0]!
     })
 
-    return toScanResponse(result)
+    if (attendanceId && this.attendanceService) {
+      try {
+        await this.attendanceService.calculate(attendanceId)
+      } catch {
+        // Calculation failure should not fail the scan
+      }
+    }
+
+    return toScanResponse(scanEvent)
   }
 
   private async recordRejection(
@@ -168,5 +182,4 @@ export class ScanService {
 
     return null
   }
-
 }
