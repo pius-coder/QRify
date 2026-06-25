@@ -8,6 +8,7 @@ import { createAuthRouter } from './modules/auth/auth.routes'
 import { createCompaniesRouter } from './modules/companies/companies.routes'
 import { createScheduleRouter } from './modules/schedules/schedules.routes'
 import { createEmployeesRouter } from './modules/employees/employees.routes'
+import { createSuperAdminRouter } from './modules/super-admin/super-admin.routes'
 
 const app = new Hono()
 
@@ -31,6 +32,7 @@ app.route('/api/v1/auth', createAuthRouter())
 app.route('/api/v1/company', createCompaniesRouter())
 app.route('/api/v1/company/schedule', createScheduleRouter())
 app.route('/api/v1/employees', createEmployeesRouter())
+app.route('/api/v1/super-admin', createSuperAdminRouter())
 
 app.onError((err, c) => {
   console.error('Unexpected error:', err)
