@@ -9,7 +9,8 @@ import { SqliteScanEventRepository } from '../../database/repositories/sqlite/sq
 import { SqliteUserRepository } from '../../database/repositories/sqlite/sqlite-user.repository'
 import { validateOrThrow } from '../../utils/validate'
 import { AttendanceService } from './attendances.service'
-import { listAttendancesQuerySchema } from './attendances.schema'
+import { listAttendancesQuerySchema, triggerAbsenceDetectionSchema } from './attendances.schema'
+import { ManualDetectionDisabledError } from './attendances.errors'
 import { authMiddleware } from '../../middlewares/auth.middleware'
 import { roleMiddleware } from '../../middlewares/role.middleware'
 import { ClockService } from '../../services/clock.service'
@@ -25,7 +26,7 @@ function createAttendanceService(db: DatabaseAdapter): AttendanceService {
   )
 }
 
-export function createAttendancesRouter(dbOverride?: DatabaseAdapter): Hono {
+export function createAttendancesRouter(dbOverride?: DatabaseAdapter, enableManualDetection = true): Hono {
   const db = dbOverride ?? getDatabase()
   const attendanceService = createAttendanceService(db)
 
@@ -46,7 +47,10 @@ export function createAttendancesRouter(dbOverride?: DatabaseAdapter): Hono {
   })
 
   router.post('/run-absence-detection', authMiddleware(), roleMiddleware('SUPER_ADMIN'), async (c: Context) => {
-    const count = await attendanceService.runAbsenceDetection()
+    if (!enableManualDetection) throw new ManualDetectionDisabledError()
+
+    const query = await validateOrThrow(triggerAbsenceDetectionSchema, c.req.query())
+    const count = await attendanceService.runAbsenceDetection(query.date)
     return c.json({ success: true, data: { markedAbsent: count } })
   })
 

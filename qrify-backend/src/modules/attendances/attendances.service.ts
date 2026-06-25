@@ -206,53 +206,94 @@ export class AttendanceService {
     return toAttendanceDetailResponse(record, events)
   }
 
-  async runAbsenceDetection(): Promise<number> {
-    const companies = await this.companyRepo.findAll()
-    const activeCompanies = companies.filter((c) => c.status === 'ACTIVE')
+  async detectAbsencesForCompany(companyId: string, workDate: string): Promise<number> {
+    const company = await this.companyRepo.findById(companyId)
+    if (!company || company.status !== 'ACTIVE') return 0
+
+    const schedule = await this.scheduleRepo.findByCompanyId(companyId)
+    if (!schedule) return 0
+
+    const days = await this.scheduleRepo.findDaysByScheduleId(schedule.id)
+    const weekdays = days.map((d) => d.weekday)
+    if (!isWorkingDay(weekdays, workDate)) return 0
+
+    const existingRecords = await this.attendanceRepo.findByCompanyAndDate(companyId, workDate)
+    const employeesWithArrival = new Set(existingRecords.filter((r) => r.arrival_at).map((r) => r.user_id))
+
+    const allUsers = await this.userRepo.findAllByCompany(companyId)
+    const activeEmployees = allUsers.filter((u) => u.role === 'EMPLOYEE' && u.status === 'ACTIVE')
+
     let markedAbsent = 0
 
-    for (const company of activeCompanies) {
-      const today = getDateInTimezone(this.clockService.nowISO(), company.timezone)
-      if (!today) continue
-
-      const schedule = await this.scheduleRepo.findByCompanyId(company.id)
-      if (!schedule) continue
-
-      const days = await this.scheduleRepo.findDaysByScheduleId(schedule.id)
-      const weekdays = days.map((d) => d.weekday)
-      if (!isWorkingDay(weekdays, today)) continue
-
-      const todayRecords = await this.attendanceRepo.findByCompanyAndDate(company.id, today)
-      const employeesWithArrival = new Set(todayRecords.filter((r) => r.arrival_at).map((r) => r.user_id))
-
-      const allUsers = await this.userRepo.findAllByCompany(company.id)
-      const activeEmployees = allUsers.filter((u) => u.role === 'EMPLOYEE' && u.status === 'ACTIVE')
-
-      for (const emp of activeEmployees) {
-        if (!employeesWithArrival.has(emp.id)) {
-          try {
-            await this.attendanceRepo.create({
-              company_id: company.id,
-              user_id: emp.id,
-              work_date: today,
-              arrival_at: null,
-              break_start_at: null,
-              break_end_at: null,
-              departure_at: null,
-              status: 'ABSENT',
-              late_minutes: 0,
-              break_minutes: 0,
-              worked_minutes: 0,
-              overtime_minutes: 0,
-            })
-            markedAbsent++
-          } catch {
-            // UNIQUE constraint may fire if record was just created concurrently
+    for (const emp of activeEmployees) {
+      if (!employeesWithArrival.has(emp.id)) {
+        try {
+          await this.attendanceRepo.create({
+            company_id: companyId,
+            user_id: emp.id,
+            work_date: workDate,
+            arrival_at: null,
+            break_start_at: null,
+            break_end_at: null,
+            departure_at: null,
+            status: 'ABSENT',
+            late_minutes: 0,
+            break_minutes: 0,
+            worked_minutes: 0,
+            overtime_minutes: 0,
+          })
+          markedAbsent++
+        } catch (err: unknown) {
+          if (err instanceof Error && err.message.includes('UNIQUE constraint')) {
+            continue
           }
+          throw err
         }
       }
     }
 
     return markedAbsent
+  }
+
+  async runAbsenceDetection(date?: string): Promise<number> {
+    const companies = await this.companyRepo.findAll()
+    const activeCompanies = companies.filter((c) => c.status === 'ACTIVE')
+    let markedAbsent = 0
+
+    for (const company of activeCompanies) {
+      const workDate = date ?? getDateInTimezone(this.clockService.nowISO(), company.timezone)
+      if (!workDate) continue
+
+      markedAbsent += await this.detectAbsencesForCompany(company.id, workDate)
+    }
+
+    return markedAbsent
+  }
+
+  async isDayOver(companyId: string): Promise<boolean> {
+    const company = await this.companyRepo.findById(companyId)
+    if (!company) return false
+
+    const schedule = await this.scheduleRepo.findByCompanyId(companyId)
+    if (!schedule) return false
+
+    const now = new Date()
+    const formatter = new Intl.DateTimeFormat('en', {
+      timeZone: company.timezone,
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false,
+    })
+    const timeStr = formatter.format(now)
+    const parts = timeStr.split(':')
+    const currentMinutes = Number(parts[0]) * 60 + Number(parts[1])
+    if (Number.isNaN(currentMinutes)) return false
+
+    const endMinutes = parseTimeToMinutes(schedule.end_time)
+    if (endMinutes === null) return false
+
+    const buffer = 60
+    const threshold = Math.min(endMinutes + buffer, 1439)
+    return currentMinutes >= threshold
   }
 }

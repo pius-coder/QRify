@@ -438,5 +438,119 @@ describe('AttendanceService', () => {
       const count = await service.runAbsenceDetection()
       expect(count).toBe(2)
     })
+
+    it('accepts an explicit date parameter', async () => {
+      await scheduleRepo.upsert('company-1', {
+        start_time: '09:00',
+        break_start_time: null,
+        break_end_time: null,
+        end_time: '18:00',
+        late_tolerance_minutes: 15,
+      })
+
+      const schedule = await scheduleRepo.findByCompanyId('company-1')
+      await scheduleRepo.upsertDays(schedule!.id, [4, 5])
+
+      const count = await service.runAbsenceDetection('2026-06-25')
+      expect(count).toBe(2)
+    })
+
+    it('returns zero for non-working day', async () => {
+      await scheduleRepo.upsert('company-1', {
+        start_time: '09:00',
+        break_start_time: null,
+        break_end_time: null,
+        end_time: '18:00',
+        late_tolerance_minutes: 15,
+      })
+
+      const schedule = await scheduleRepo.findByCompanyId('company-1')
+      await scheduleRepo.upsertDays(schedule!.id, [1])
+
+      const count = await service.runAbsenceDetection('2026-06-25')
+      expect(count).toBe(0)
+    })
+
+    it('is idempotent on second run', async () => {
+      await scheduleRepo.upsert('company-1', {
+        start_time: '09:00',
+        break_start_time: null,
+        break_end_time: null,
+        end_time: '18:00',
+        late_tolerance_minutes: 15,
+      })
+
+      const schedule = await scheduleRepo.findByCompanyId('company-1')
+      await scheduleRepo.upsertDays(schedule!.id, [4, 5])
+
+      const first = await service.runAbsenceDetection('2026-06-25')
+      const second = await service.runAbsenceDetection('2026-06-25')
+      expect(first).toBe(2)
+      expect(second).toBe(0)
+    })
+  })
+
+  describe('detectAbsencesForCompany', () => {
+    it('creates ABSENT records for active employees without arrival', async () => {
+      await scheduleRepo.upsert('company-1', {
+        start_time: '09:00',
+        break_start_time: null,
+        break_end_time: null,
+        end_time: '18:00',
+        late_tolerance_minutes: 15,
+      })
+
+      const schedule = await scheduleRepo.findByCompanyId('company-1')
+      await scheduleRepo.upsertDays(schedule!.id, [4, 5])
+
+      const count = await service.detectAbsencesForCompany('company-1', '2026-06-25')
+      expect(count).toBe(2)
+
+      const records = await attendanceRepo.findByCompanyAndDate('company-1', '2026-06-25')
+      expect(records).toHaveLength(2)
+      expect(records[0]!.status).toBe('ABSENT')
+      expect(records[1]!.status).toBe('ABSENT')
+    })
+
+    it('skips employees who already have arrival', async () => {
+      await attendanceRepo.create({
+        company_id: 'company-1',
+        user_id: 'user-1',
+        work_date: '2026-06-25',
+        arrival_at: '2026-06-25T09:00:00.000Z',
+        break_start_at: null,
+        break_end_at: null,
+        departure_at: null,
+        status: 'PRESENT',
+        late_minutes: 0,
+        break_minutes: 0,
+        worked_minutes: 0,
+        overtime_minutes: 0,
+      })
+
+      await scheduleRepo.upsert('company-1', {
+        start_time: '09:00',
+        break_start_time: null,
+        break_end_time: null,
+        end_time: '18:00',
+        late_tolerance_minutes: 15,
+      })
+
+      const schedule = await scheduleRepo.findByCompanyId('company-1')
+      await scheduleRepo.upsertDays(schedule!.id, [4, 5])
+
+      const count = await service.detectAbsencesForCompany('company-1', '2026-06-25')
+      expect(count).toBe(1)
+
+      const records = await attendanceRepo.findByCompanyAndDate('company-1', '2026-06-25')
+      expect(records).toHaveLength(2)
+      const presentUser = records.find((r) => r.user_id === 'user-1')
+      expect(presentUser!.status).toBe('PRESENT')
+    })
+
+    it('returns zero for inactive company', async () => {
+      const count = await service.detectAbsencesForCompany('nonexistent', '2026-06-25')
+      expect(count).toBe(0)
+    })
   })
 })

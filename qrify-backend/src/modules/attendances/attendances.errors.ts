@@ -29,3 +29,9 @@ export class NotWorkingDayError extends BadRequestError {
     super(message)
   }
 }
+
+export class ManualDetectionDisabledError extends ForbiddenError {
+  constructor(message = 'Manual absence detection is disabled in this environment') {
+    super(message)
+  }
+}
