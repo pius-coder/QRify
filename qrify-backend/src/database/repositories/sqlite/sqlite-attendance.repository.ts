@@ -46,6 +46,14 @@ export class SqliteAttendanceRepository implements AttendanceRepository {
     return rows
   }
 
+  async findByUserAndDateRange(userId: string, startDate: string, endDate: string): Promise<AttendanceData[]> {
+    const { rows } = this.db.query<AttendanceData>(
+      'SELECT * FROM attendance_records WHERE user_id = ? AND work_date >= ? AND work_date <= ? ORDER BY work_date DESC',
+      [userId, startDate, endDate]
+    )
+    return rows
+  }
+
   async findAllByUser(userId: string): Promise<AttendanceData[]> {
     const { rows } = this.db.query<AttendanceData>('SELECT * FROM attendance_records WHERE user_id = ? ORDER BY work_date DESC', [userId])
     return rows
