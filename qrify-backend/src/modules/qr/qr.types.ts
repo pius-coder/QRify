@@ -3,6 +3,7 @@ import type { QrSessionData } from '../../database/repositories/contracts/qr-ses
 export interface ActiveQrResponse {
   sessionId: string
   companyId: string
+  companyName: string
   eventType: string
   token: string
   validFrom: string
@@ -10,10 +11,11 @@ export interface ActiveQrResponse {
   workDate: string
 }
 
-export function toActiveQrResponse(session: QrSessionData, rawToken: string): ActiveQrResponse {
+export function toActiveQrResponse(session: QrSessionData, rawToken: string, companyName: string): ActiveQrResponse {
   return {
     sessionId: session.id,
     companyId: session.company_id,
+    companyName,
     eventType: session.event_type,
     token: rawToken,
     validFrom: session.valid_from,
