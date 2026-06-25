@@ -55,7 +55,7 @@ export class QrSessionService {
       status: 'ACTIVE',
     })
 
-    return toActiveQrResponse(session, raw)
+    return toActiveQrResponse(session, raw, company.name)
   }
 
   async getActiveQrByCompanyCode(companyCode: string): Promise<ActiveQrResponse> {

@@ -119,6 +119,7 @@ describe('QrSessionService', () => {
 
       expect(result.eventType).toBe('ARRIVAL')
       expect(result.companyId).toBe(companyId)
+      expect(result.companyName).toBe('Test Corp')
       expect(result.token).toBeTruthy()
       expect(result.workDate).toBe('2026-06-25')
       expect(result.validFrom).toBeTruthy()
@@ -198,6 +199,7 @@ describe('QrSessionService', () => {
     it('returns active QR for valid company code', async () => {
       const result = await service.getActiveQrByCompanyCode('TEST01')
       expect(result.companyId).toBe('test-company-id')
+      expect(result.companyName).toBe('Test Corp')
       expect(result.eventType).toBe('ARRIVAL')
       expect(result.token).toBeTruthy()
     })
