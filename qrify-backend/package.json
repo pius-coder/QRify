@@ -8,7 +8,7 @@
     "dev": "bun run --hot src/index.ts",
     "start": "bun run src/index.ts",
     "build": "bun build src/index.ts --outdir ./dist --target bun",
-    "test": "JWT_SECRET=test-secret-key-for-testing-purposes-only-123 bun test",
+    "test": "JWT_SECRET=test-secret-key-for-testing-purposes-only-12345 bun test",
     "typecheck": "tsc --noEmit",
     "migrate": "bun run scripts/migrate.ts",
     "seed": "bun run scripts/seed.ts",
