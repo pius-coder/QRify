@@ -200,6 +200,7 @@ Attendance tracking app with multi-tenant QR code scanning.
 - Status transitions validated: PENDING→ACTIVE|REJECTED, ACTIVE→SUSPENDED, SUSPENDED→ACTIVE
 - Email uniqueness checked on update via `existsByEmail`
 
+
 ## Work Schedule Module (Frontend)
 
 ### API Endpoints Consumed (`/api/v1/company/schedule`)
