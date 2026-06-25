@@ -175,6 +175,32 @@ Attendance tracking app with multi-tenant QR code scanning.
 | `src/lib/stores/company.store.ts` | `company` store with `load()`, `update()` |
 | `src/routes/admin/company/+page.svelte` | Company profile view/edit page |
 
+## Employee Management Module (Backend)
+
+### API Endpoints (`/api/v1/employees`)
+| Endpoint | Auth | Description |
+|----------|------|-------------|
+| `GET /` | COMPANY_ADMIN | Lists all EMPLOYEE role users in company |
+| `GET /:id` | COMPANY_ADMIN | Returns single employee by ID |
+| `PUT /:id` | COMPANY_ADMIN | Updates employee firstName, lastName, email |
+| `PATCH /:id/status` | COMPANY_ADMIN | Updates employee status (PENDING→ACTIVE, ACTIVE→SUSPENDED, etc.) |
+
+### Module Files
+| File | Purpose |
+|------|---------|
+| `src/modules/employees/employees.types.ts` | `EmployeeResponse`, `UpdateEmployeeDTO`, `UpdateEmployeeStatusDTO`, `toEmployeeResponse` |
+| `src/modules/employees/employees.errors.ts` | `EmployeeNotFoundError`, `EmployeeNotInCompanyError`, `InvalidStatusTransitionError`, `CannotModifyCompanyAdminError` |
+| `src/modules/employees/employees.schema.ts` | Zod schemas with status transition validation |
+| `src/modules/employees/employees.service.ts` | `EmployeeService` with list, getById, update, updateStatus |
+| `src/modules/employees/employees.routes.ts` | `createEmployeesRouter(dbOverride?)` factory |
+
+### Key Behaviors
+- Only COMPANY_ADMIN role can manage employees
+- Only EMPLOYEE role users are shown in list; COMPANY_ADMIN users are protected
+- Status transitions validated: PENDING→ACTIVE|REJECTED, ACTIVE→SUSPENDED, SUSPENDED→ACTIVE
+- Email uniqueness checked on update via `existsByEmail`
+
+
 ## Work Schedule Module (Frontend)
 
 ### API Endpoints Consumed (`/api/v1/company/schedule`)
