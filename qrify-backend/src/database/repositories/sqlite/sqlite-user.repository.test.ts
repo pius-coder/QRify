@@ -122,6 +122,24 @@ describe('SqliteUserRepository', () => {
     })
   })
 
+  describe('update', () => {
+    it('updates user fields', async () => {
+      await userRepo.create(sampleUser)
+
+      const updated = await userRepo.update('user-1', { first_name: 'Jane', last_name: 'Smith' })
+
+      expect(updated?.first_name).toBe('Jane')
+      expect(updated?.last_name).toBe('Smith')
+      expect(updated?.email).toBe('john@test.com')
+    })
+
+    it('returns null for non-existent id', async () => {
+      const updated = await userRepo.update('non-existent', { first_name: 'Jane' })
+
+      expect(updated).toBeNull()
+    })
+  })
+
   describe('existsByEmail', () => {
     it('returns true for existing email', async () => {
       await userRepo.create(sampleUser)
