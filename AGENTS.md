@@ -99,6 +99,10 @@ Attendance tracking app with multi-tenant QR code scanning.
 - `cd qrify-backend && bun run typecheck` — TypeScript check
 - `cd qrify-backend && bun run migrate` — Run migrations
 - `cd qrify-backend && bun run seed` — Seed demo data
+- `cd qrify-frontend && bun run dev` — Dev server
+- `cd qrify-frontend && bun run check` — Type check
+- `cd qrify-frontend && bun run lint` — Lint
+- `cd qrify-frontend && bun run format` — Format
 
 ## Auth Module Structure
 
@@ -128,6 +132,48 @@ Attendance tracking app with multi-tenant QR code scanning.
 - All errors extend `ApiError` from `src/utils/errors.ts`
 - Response format: `{ success: true, data }` or `{ success: false, error: { code, message } }`
 - `import type` for type-only imports (verbatimModuleSyntax)
+
+## Frontend Module Conventions
+
+### API Client Pattern
+- `src/lib/api/api-client.ts` — Central client with `apiGet`, `apiPost`, `apiPut`
+- Each domain gets a dedicated module: `src/lib/api/{domain}.api.ts`
+- Functions wrap `apiGet`/`apiPost`/`apiPut` with correct paths and typed returns
+- Uses `credentials: 'include'` for cookie-based auth
+
+### Store Pattern
+- `src/lib/stores/{domain}.store.ts` — Writable + derived store
+- State interface with domain data, isLoading, error
+- Methods: load, create/update, clearError, clearSuccess
+- Returns `Promise<boolean>` for form submission flow
+
+### Types Pattern
+- `src/lib/types/{domain}.types.ts` — DTOs and response interfaces
+- camelCase naming matching backend camelCase conversion
+- Separate interfaces for data models, DTOs, and response shapes
+
+### Page Pattern
+- `src/routes/{role}/{feature}/+page.svelte` — Route per role and feature
+- Form handling with `$state`, `onMount` for init, `goto` for redirect
+- Error display with conditional `{#if}` blocks
+- Success/loading states managed by stores
+
+## Company Profile Module (Frontend)
+
+### API Endpoints Consumed (`/api/v1/company`)
+| Endpoint | Auth | Description |
+|----------|------|-------------|
+| `GET /company` | COMPANY_ADMIN | Returns company profile |
+| `PUT /company` | COMPANY_ADMIN | Updates name and timezone |
+| `GET /company/code` | COMPANY_ADMIN | Returns company code |
+
+### Frontend Files
+| File | Purpose |
+|------|---------|
+| `src/lib/types/company.types.ts` | `CompanyProfile`, `UpdateCompanyDTO`, `CompanyCodeResponse` |
+| `src/lib/api/company.api.ts` | `getCompany()`, `updateCompany()`, `getCompanyCode()` |
+| `src/lib/stores/company.store.ts` | `company` store with `load()`, `update()` |
+| `src/routes/admin/company/+page.svelte` | Company profile view/edit page |
 
 ## Rules
 
