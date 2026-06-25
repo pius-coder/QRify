@@ -45,4 +45,12 @@ export class SqliteQrSessionRepository implements QrSessionRepository {
   async revokeByCompanyAndDate(companyId: string, workDate: string): Promise<void> {
     this.db.run("UPDATE qr_sessions SET status = 'REVOKED' WHERE company_id = ? AND work_date = ?", [companyId, workDate])
   }
+
+  async countActiveByCompany(companyId: string): Promise<number> {
+    const { rows } = this.db.query<{ count: number }>(
+      "SELECT COUNT(*) as count FROM qr_sessions WHERE company_id = ? AND status = 'ACTIVE' AND valid_until > datetime('now')",
+      [companyId]
+    )
+    return (rows[0] as { count: number }).count
+  }
 }
