@@ -16,7 +16,7 @@ export class SqliteQrSessionRepository implements QrSessionRepository {
   async create(data: Omit<QrSessionData, 'id' | 'created_at'>): Promise<QrSessionData> {
     const id = randomUUID()
     this.db.run(
-      'INSERT INTO qr_sessions (id, company_id, work_date, event_type, token_hash, valid_from, valid_until, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT OR REPLACE INTO qr_sessions (id, company_id, work_date, event_type, token_hash, valid_from, valid_until, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [id, data.company_id, data.work_date, data.event_type, data.token_hash, data.valid_from, data.valid_until, data.status]
     )
     const { rows } = this.db.query<QrSessionData>('SELECT * FROM qr_sessions WHERE id = ?', [id])

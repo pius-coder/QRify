@@ -7,6 +7,7 @@ import { ApiError, NotFoundError, formatErrorResponse } from './utils/errors'
 import { createAuthRouter } from './modules/auth/auth.routes'
 import { createCompaniesRouter } from './modules/companies/companies.routes'
 import { createScheduleRouter } from './modules/schedules/schedules.routes'
+import { createQrRouter, createPublicQrRouter } from './modules/qr/qr.routes'
 import { createEmployeesRouter } from './modules/employees/employees.routes'
 
 const app = new Hono()
@@ -30,6 +31,8 @@ app.get('/api/v1/health', (c) => {
 app.route('/api/v1/auth', createAuthRouter())
 app.route('/api/v1/company', createCompaniesRouter())
 app.route('/api/v1/company/schedule', createScheduleRouter())
+app.route('/api/v1/company/qr', createQrRouter())
+app.route('/api/v1/public/companies', createPublicQrRouter())
 app.route('/api/v1/employees', createEmployeesRouter())
 
 app.onError((err, c) => {

@@ -251,6 +251,39 @@ Attendance tracking app with multi-tenant QR code scanning.
 - Time format: HH:MM 24h via `<input type="time">`
 - All validation handled by backend Zod schema; no frontend schema validation
 
+## QR Session Module (Backend)
+
+### API Endpoints
+| Endpoint | Auth | Description |
+|----------|------|-------------|
+| `GET /api/v1/company/qr/status` | COMPANY_ADMIN | Returns active QR session status for current user's company |
+| `GET /api/v1/public/companies/:companyCode/active-qr` | No | Returns active QR for scanning kiosk |
+
+### Module Files (`src/modules/qr/`)
+| File | Purpose |
+|------|---------|
+| `qr.types.ts` | `ActiveQrResponse`, `toActiveQrResponse` |
+| `qr.errors.ts` | `CompanyNotActiveError`, `NoScheduleError`, `NotWorkingDayError`, `NoActiveQrError`, `CompanyCodeNotFoundError` |
+| `qr.schema.ts` | Zod schemas (currently stub) |
+| `qr.service.ts` | `QrSessionService` with `getOrCreateActiveSession`, `getActiveQrByCompanyCode` |
+| `qr.routes.ts` | `createQrRouter` (admin) and `createPublicQrRouter` (public) factories |
+| `qr.service.test.ts` | 17 tests covering window detection, session lifecycle, error paths |
+| `qr.routes.test.ts` | 6 tests covering auth guards, valid/invalid codes, company status |
+
+### Key Behaviors
+- Sessions created lazily on-demand when active QR is requested
+- 4 event type windows: ARRIVAL, BREAK_START, BREAK_END, DEPARTURE
+- Window config in `src/config/qr.config.ts` (arrivalOpen/arrivalClose minutes, etc.)
+- Timezone-aware via `Intl.DateTimeFormat` — no external library needed
+- Token: 32-byte random → hex, stored as SHA-256 hash (raw token only available in response)
+- INSERT OR REPLACE handles UNIQUE(company_id, work_date, event_type) constraint
+- Window order: ARRIVAL → BREAK_START → BREAK_END → DEPARTURE; first match wins
+- Break windows skipped if schedule lacks breakStartTime/breakEndTime
+
+### Route Factories
+- `createQrRouter(dbOverride?)` — Mounted at `/api/v1/company/qr`, guarded by auth middleware + COMPANY_ADMIN role
+- `createPublicQrRouter(dbOverride?)` — Mounted at `/api/v1/public/companies`, no auth, for scanning kiosk
+
 ## Rules
 
 - **Worktrees** — [.agents/rules/worktrees.md](.agents/rules/worktrees.md) — Worktree usage for parallel AI agents
