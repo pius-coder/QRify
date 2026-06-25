@@ -10,6 +10,8 @@ import { createScheduleRouter } from './modules/schedules/schedules.routes'
 import { createQrRouter, createPublicQrRouter } from './modules/qr/qr.routes'
 import { createEmployeesRouter } from './modules/employees/employees.routes'
 import { createSuperAdminRouter } from './modules/super-admin/super-admin.routes'
+import { createScansRouter } from './modules/scans/scans.routes'
+import { createAttendancesRouter } from './modules/attendances/attendances.routes'
 
 const app = new Hono()
 
@@ -36,6 +38,8 @@ app.route('/api/v1/company/qr', createQrRouter())
 app.route('/api/v1/public/companies', createPublicQrRouter())
 app.route('/api/v1/employees', createEmployeesRouter())
 app.route('/api/v1/super-admin', createSuperAdminRouter())
+app.route('/api/v1/scans', createScansRouter())
+app.route('/api/v1/attendances', createAttendancesRouter())
 
 app.onError((err, c) => {
   console.error('Unexpected error:', err)

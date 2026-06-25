@@ -12,6 +12,7 @@ export interface QrSessionData {
 
 export interface QrSessionRepository {
   findActiveByCompanyAndType(companyId: string, eventType: string, workDate: string): Promise<QrSessionData | null>
+  findByTokenHash(tokenHash: string): Promise<QrSessionData | null>
   create(data: Omit<QrSessionData, 'id' | 'created_at'>): Promise<QrSessionData>
   expireById(id: string): Promise<void>
   revokeByCompanyAndDate(companyId: string, workDate: string): Promise<void>
