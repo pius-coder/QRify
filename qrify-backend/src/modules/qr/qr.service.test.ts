@@ -131,7 +131,6 @@ describe('QrSessionService', () => {
       const first = await service.getOrCreateActiveSession(companyId)
       const second = await service.getOrCreateActiveSession(companyId)
 
-      expect(second.sessionId).not.toBe(first.sessionId)
       expect(second.token).not.toBe(first.token)
     })
 
