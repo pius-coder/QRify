@@ -201,6 +201,33 @@ Attendance tracking app with multi-tenant QR code scanning.
 - Email uniqueness checked on update via `existsByEmail`
 
 
+## Employee Management Module (Frontend)
+
+### API Endpoints Consumed (`/api/v1/employees`)
+| Endpoint | Auth | Description |
+|----------|------|-------------|
+| `GET /employees` | COMPANY_ADMIN | Lists all EMPLOYEE role users in company |
+| `GET /employees/:id` | COMPANY_ADMIN | Returns single employee by ID |
+| `PUT /employees/:id` | COMPANY_ADMIN | Updates employee firstName, lastName, email |
+| `PATCH /employees/:id/status` | COMPANY_ADMIN | Updates employee status |
+
+### Frontend Files
+| File | Purpose |
+|------|---------|
+| `src/lib/types/employee.types.ts` | `EmployeeResponse`, `UpdateEmployeeDTO`, `UpdateEmployeeStatusDTO`, `EmployeeListResponseData`, `EmployeeResponseData` |
+| `src/lib/api/employee.api.ts` | `listEmployees()`, `getEmployee()`, `updateEmployee()`, `updateEmployeeStatus()` |
+| `src/lib/stores/employee.store.ts` | `employees` store with `load()`, `updateStatus()`, error auto-clear |
+| `src/routes/admin/employees/+page.svelte` | Employee list with status filter, search, approve/reject/suspend/reactivate actions |
+
+### Key Behaviors
+- Only EMPLOYEE role users shown; COMPANY_ADMIN users not visible
+- Status filter dropdown and case-insensitive search by name/email
+- Confirm dialog before status change actions
+- In-place store update on status change (no full reload)
+- Error auto-clears after 5 seconds; success message dismissible
+- Loading indicator ("Updating...") shown during status mutations
+- PATCH method used for status changes via `apiPatch` helper
+
 ## Work Schedule Module (Frontend)
 
 ### API Endpoints Consumed (`/api/v1/company/schedule`)
