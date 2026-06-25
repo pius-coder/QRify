@@ -175,6 +175,29 @@ Attendance tracking app with multi-tenant QR code scanning.
 | `src/lib/stores/company.store.ts` | `company` store with `load()`, `update()` |
 | `src/routes/admin/company/+page.svelte` | Company profile view/edit page |
 
+## Work Schedule Module (Frontend)
+
+### API Endpoints Consumed (`/api/v1/company/schedule`)
+| Endpoint | Auth | Description |
+|----------|------|-------------|
+| `GET /company/schedule` | COMPANY_ADMIN | Returns work schedule or 404 |
+| `PUT /company/schedule` | COMPANY_ADMIN | Creates or updates work schedule |
+
+### Frontend Files
+| File | Purpose |
+|------|---------|
+| `src/lib/types/schedule.types.ts` | `ScheduleResponse`, `UpdateScheduleDTO`, `WEEKDAY_LABELS` |
+| `src/lib/api/schedule.api.ts` | `getSchedule()`, `upsertSchedule()` |
+| `src/lib/stores/schedule.store.ts` | `schedule` store with `load()`, `update()`, 404 handling |
+| `src/routes/admin/schedule/+page.svelte` | Work schedule view/edit page with weekday checkboxes, break toggle |
+
+### Key Behaviors
+- Store handles 404 (no schedule yet) gracefully by setting `schedule=null` without error
+- Break toggle: both breakStartTime/breakEndTime are null when break is disabled
+- Weekdays use numbers 1-7 (Mon-Sun), sorted ascending
+- Time format: HH:MM 24h via `<input type="time">`
+- All validation handled by backend Zod schema; no frontend schema validation
+
 ## Rules
 
 - **Worktrees** — [.agents/rules/worktrees.md](.agents/rules/worktrees.md) — Worktree usage for parallel AI agents
