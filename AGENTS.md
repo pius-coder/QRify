@@ -175,6 +175,82 @@ Attendance tracking app with multi-tenant QR code scanning.
 | `src/lib/stores/company.store.ts` | `company` store with `load()`, `update()` |
 | `src/routes/admin/company/+page.svelte` | Company profile view/edit page |
 
+## Employee Management Module (Backend)
+
+### API Endpoints (`/api/v1/employees`)
+| Endpoint | Auth | Description |
+|----------|------|-------------|
+| `GET /` | COMPANY_ADMIN | Lists all EMPLOYEE role users in company |
+| `GET /:id` | COMPANY_ADMIN | Returns single employee by ID |
+| `PUT /:id` | COMPANY_ADMIN | Updates employee firstName, lastName, email |
+| `PATCH /:id/status` | COMPANY_ADMIN | Updates employee status (PENDING→ACTIVE, ACTIVE→SUSPENDED, etc.) |
+
+### Module Files
+| File | Purpose |
+|------|---------|
+| `src/modules/employees/employees.types.ts` | `EmployeeResponse`, `UpdateEmployeeDTO`, `UpdateEmployeeStatusDTO`, `toEmployeeResponse` |
+| `src/modules/employees/employees.errors.ts` | `EmployeeNotFoundError`, `EmployeeNotInCompanyError`, `InvalidStatusTransitionError`, `CannotModifyCompanyAdminError` |
+| `src/modules/employees/employees.schema.ts` | Zod schemas with status transition validation |
+| `src/modules/employees/employees.service.ts` | `EmployeeService` with list, getById, update, updateStatus |
+| `src/modules/employees/employees.routes.ts` | `createEmployeesRouter(dbOverride?)` factory |
+
+### Key Behaviors
+- Only COMPANY_ADMIN role can manage employees
+- Only EMPLOYEE role users are shown in list; COMPANY_ADMIN users are protected
+- Status transitions validated: PENDING→ACTIVE|REJECTED, ACTIVE→SUSPENDED, SUSPENDED→ACTIVE
+- Email uniqueness checked on update via `existsByEmail`
+
+
+## Employee Management Module (Frontend)
+
+### API Endpoints Consumed (`/api/v1/employees`)
+| Endpoint | Auth | Description |
+|----------|------|-------------|
+| `GET /employees` | COMPANY_ADMIN | Lists all EMPLOYEE role users in company |
+| `GET /employees/:id` | COMPANY_ADMIN | Returns single employee by ID |
+| `PUT /employees/:id` | COMPANY_ADMIN | Updates employee firstName, lastName, email |
+| `PATCH /employees/:id/status` | COMPANY_ADMIN | Updates employee status |
+
+### Frontend Files
+| File | Purpose |
+|------|---------|
+| `src/lib/types/employee.types.ts` | `EmployeeResponse`, `UpdateEmployeeDTO`, `UpdateEmployeeStatusDTO`, `EmployeeListResponseData`, `EmployeeResponseData` |
+| `src/lib/api/employee.api.ts` | `listEmployees()`, `getEmployee()`, `updateEmployee()`, `updateEmployeeStatus()` |
+| `src/lib/stores/employee.store.ts` | `employees` store with `load()`, `updateStatus()`, error auto-clear |
+| `src/routes/admin/employees/+page.svelte` | Employee list with status filter, search, approve/reject/suspend/reactivate actions |
+
+### Key Behaviors
+- Only EMPLOYEE role users shown; COMPANY_ADMIN users not visible
+- Status filter dropdown and case-insensitive search by name/email
+- Confirm dialog before status change actions
+- In-place store update on status change (no full reload)
+- Error auto-clears after 5 seconds; success message dismissible
+- Loading indicator ("Updating...") shown during status mutations
+- PATCH method used for status changes via `apiPatch` helper
+
+## Work Schedule Module (Frontend)
+
+### API Endpoints Consumed (`/api/v1/company/schedule`)
+| Endpoint | Auth | Description |
+|----------|------|-------------|
+| `GET /company/schedule` | COMPANY_ADMIN | Returns work schedule or 404 |
+| `PUT /company/schedule` | COMPANY_ADMIN | Creates or updates work schedule |
+
+### Frontend Files
+| File | Purpose |
+|------|---------|
+| `src/lib/types/schedule.types.ts` | `ScheduleResponse`, `UpdateScheduleDTO`, `WEEKDAY_LABELS` |
+| `src/lib/api/schedule.api.ts` | `getSchedule()`, `upsertSchedule()` |
+| `src/lib/stores/schedule.store.ts` | `schedule` store with `load()`, `update()`, 404 handling |
+| `src/routes/admin/schedule/+page.svelte` | Work schedule view/edit page with weekday checkboxes, break toggle |
+
+### Key Behaviors
+- Store handles 404 (no schedule yet) gracefully by setting `schedule=null` without error
+- Break toggle: both breakStartTime/breakEndTime are null when break is disabled
+- Weekdays use numbers 1-7 (Mon-Sun), sorted ascending
+- Time format: HH:MM 24h via `<input type="time">`
+- All validation handled by backend Zod schema; no frontend schema validation
+
 ## QR Session Module (Backend)
 
 ### API Endpoints

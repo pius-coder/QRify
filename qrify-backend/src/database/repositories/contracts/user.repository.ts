@@ -16,6 +16,7 @@ export interface UserRepository {
   findByEmail(email: string): Promise<UserData | null>
   findAllByCompany(companyId: string): Promise<UserData[]>
   create(data: Omit<UserData, 'created_at' | 'updated_at'>): Promise<UserData>
+  update(id: string, data: Partial<Omit<UserData, 'id' | 'created_at' | 'updated_at'>>): Promise<UserData | null>
   updateStatus(id: string, status: string): Promise<UserData | null>
   existsByEmail(email: string): Promise<boolean>
 }
