@@ -7,6 +7,8 @@ const envSchema = z.object({
   DATABASE_URL: z.string().default('./data/qrify.sqlite'),
   DB_TYPE: z.enum(['sqlite']).default('sqlite'),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
+  ENABLE_MANUAL_ABSENCE_DETECTION: z.coerce.boolean().default(true),
+  ABSENCE_DETECTION_INTERVAL: z.coerce.number().default(900000),
 })
 
 export const env = envSchema.parse(process.env)

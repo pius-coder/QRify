@@ -13,6 +13,15 @@ import { createSuperAdminRouter } from './modules/super-admin/super-admin.routes
 import { createStatisticsRouter } from './modules/statistics/statistics.routes'
 import { createScansRouter } from './modules/scans/scans.routes'
 import { createAttendancesRouter } from './modules/attendances/attendances.routes'
+import { AttendanceService } from './modules/attendances/attendances.service'
+import { AbsenceJobRunner } from './modules/attendances/absence-job-runner'
+import { getDatabase } from './database/database.factory'
+import { SqliteAttendanceRepository } from './database/repositories/sqlite/sqlite-attendance.repository'
+import { SqliteCompanyRepository } from './database/repositories/sqlite/sqlite-company.repository'
+import { SqliteScheduleRepository } from './database/repositories/sqlite/sqlite-schedule.repository'
+import { SqliteScanEventRepository } from './database/repositories/sqlite/sqlite-scan-event.repository'
+import { SqliteUserRepository } from './database/repositories/sqlite/sqlite-user.repository'
+import { ClockService } from './services/clock.service'
 
 const app = new Hono()
 
