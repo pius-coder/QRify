@@ -228,6 +228,29 @@ Attendance tracking app with multi-tenant QR code scanning.
 - Loading indicator ("Updating...") shown during status mutations
 - PATCH method used for status changes via `apiPatch` helper
 
+## Attendance Management Module (Frontend)
+
+### API Endpoints Consumed (`/api/v1/attendances`)
+| Endpoint | Auth | Description |
+|----------|------|-------------|
+| `GET /attendances` | COMPANY_ADMIN | Lists attendance records with filters and pagination |
+
+### Frontend Files
+| File | Purpose |
+|------|---------|
+| `src/lib/types/attendance.types.ts` | `AttendanceResponse` (includes firstName, lastName, email), `PaginationMeta`, `AttendanceListResponseData`, `ListAttendancesDTO`, status label/variant maps |
+| `src/lib/api/attendance.api.ts` | `listAttendances(params?)` with query params for date, status, search, page, limit |
+| `src/lib/stores/attendance.store.ts` | `attendances` store with `load(params?)`, `clearError()`, server-side pagination |
+| `src/routes/admin/attendance/+page.svelte` | Attendance list with date filter, status dropdown, search input, table with employee name/email/status/arrival/departure/worked minutes, Badge variants by status, Pagination component |
+
+### Key Behaviors
+- Server-side filtering and pagination via query params; `handleFilterChange` resets to page 1
+- Status badges use variants: PRESENT=default, LATE=destructive, ABSENT=outline, INCOMPLETE=secondary
+- Response includes employee firstName, lastName, email joined from users table
+- Pagination uses bits-ui Pagination component with PrevButton/NextButton and page links
+- Date filter uses native `<input type="date">`
+- Empty state shows contextual message (with/without active filters)
+
 ## Super Admin Module (Backend)
 
 ### API Endpoints (`/api/v1/super-admin`)

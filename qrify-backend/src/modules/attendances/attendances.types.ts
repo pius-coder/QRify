@@ -5,6 +5,9 @@ export interface AttendanceResponse {
   id: string
   companyId: string
   userId: string
+  firstName: string
+  lastName: string
+  email: string
   workDate: string
   arrivalAt: string | null
   breakStartAt: string | null
@@ -49,11 +52,14 @@ export interface AttendanceListResponseData {
   pagination: PaginationMeta
 }
 
-export function toAttendanceResponse(r: AttendanceData): AttendanceResponse {
+export function toAttendanceResponse(r: AttendanceData, user?: { firstName: string; lastName: string; email: string }): AttendanceResponse {
   return {
     id: r.id,
     companyId: r.company_id,
     userId: r.user_id,
+    firstName: user?.firstName ?? '',
+    lastName: user?.lastName ?? '',
+    email: user?.email ?? '',
     workDate: r.work_date,
     arrivalAt: r.arrival_at,
     breakStartAt: r.break_start_at,
@@ -69,9 +75,9 @@ export function toAttendanceResponse(r: AttendanceData): AttendanceResponse {
   }
 }
 
-export function toAttendanceDetailResponse(r: AttendanceData, events: ScanEventData[]): AttendanceDetailResponse {
+export function toAttendanceDetailResponse(r: AttendanceData, events: ScanEventData[], user?: { firstName: string; lastName: string; email: string }): AttendanceDetailResponse {
   return {
-    ...toAttendanceResponse(r),
+    ...toAttendanceResponse(r, user),
     events: events.map((e) => ({
       id: e.id,
       eventType: e.event_type,

@@ -167,6 +167,9 @@ export class AttendanceService {
     const date = query.date ?? getDateInTimezone(this.clockService.nowISO(), 'UTC') ?? ''
     const records = await this.attendanceRepo.findByCompanyAndDate(companyId, date)
 
+    const allCompanyUsers = await this.userRepo.findAllByCompany(companyId)
+    const userMap = new Map(allCompanyUsers.map((u) => [u.id, u]))
+
     let filtered = records
 
     if (query.status) {
@@ -175,7 +178,6 @@ export class AttendanceService {
 
     if (query.search) {
       const q = query.search.toLowerCase()
-      const allCompanyUsers = await this.userRepo.findAllByCompany(companyId)
       const matchedIds = new Set(
         allCompanyUsers
           .filter((u) => u.first_name.toLowerCase().includes(q) || u.last_name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))
@@ -191,7 +193,10 @@ export class AttendanceService {
     const paged = filtered.slice(start, start + limit)
 
     return {
-      attendances: paged.map(toAttendanceResponse),
+      attendances: paged.map((r) => {
+        const u = userMap.get(r.user_id)
+        return toAttendanceResponse(r, u ? { firstName: u.first_name, lastName: u.last_name, email: u.email } : undefined)
+      }),
       pagination: { page, limit, total },
     }
   }
@@ -201,9 +206,10 @@ export class AttendanceService {
     if (!record) throw new AttendanceNotFoundError()
     if (record.company_id !== companyId) throw new AttendanceNotInCompanyError()
 
+    const user = await this.userRepo.findById(record.user_id)
     const events = await this.scanEventRepo.findByUserAndDate(record.user_id, record.work_date)
 
-    return toAttendanceDetailResponse(record, events)
+    return toAttendanceDetailResponse(record, events, user ? { firstName: user.first_name, lastName: user.last_name, email: user.email } : undefined)
   }
 
   async detectAbsencesForCompany(companyId: string, workDate: string): Promise<number> {
