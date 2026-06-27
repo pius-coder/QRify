@@ -1,5 +1,9 @@
 import { writable, derived } from 'svelte/store';
-import type { AttendanceResponse, PaginationMeta } from '$lib/types/attendance.types';
+import type {
+	AttendanceResponse,
+	AttendanceDetailResponse,
+	PaginationMeta
+} from '$lib/types/attendance.types';
 import { extractApiError } from '$lib/utils/api-errors';
 import * as attendanceApi from '$lib/api/attendance.api';
 
@@ -12,10 +16,20 @@ interface AttendanceState {
 	error: AttendanceError;
 }
 
+interface AttendanceDetailState {
+	currentAttendance: AttendanceDetailResponse | null;
+	detailLoading: boolean;
+	detailError: AttendanceError;
+}
+
 const _attendances = writable<AttendanceResponse[]>([]);
 const _pagination = writable<PaginationMeta | null>(null);
 const _isLoading = writable(false);
 const _error = writable<AttendanceError>(null);
+
+const _currentAttendance = writable<AttendanceDetailResponse | null>(null);
+const _detailLoading = writable(false);
+const _detailError = writable<AttendanceError>(null);
 
 function createAttendanceStore() {
 	const state = derived(
@@ -25,6 +39,15 @@ function createAttendanceStore() {
 			pagination: $pagination,
 			isLoading: $isLoading,
 			error: $error
+		})
+	);
+
+	const detailState = derived(
+		[_currentAttendance, _detailLoading, _detailError],
+		([$currentAttendance, $detailLoading, $detailError]): AttendanceDetailState => ({
+			currentAttendance: $currentAttendance,
+			detailLoading: $detailLoading,
+			detailError: $detailError
 		})
 	);
 
@@ -49,14 +72,36 @@ function createAttendanceStore() {
 		}
 	}
 
+	async function getAttendance(id: string) {
+		_detailLoading.set(true);
+		_detailError.set(null);
+		try {
+			const result = await attendanceApi.getAttendance(id);
+			_currentAttendance.set(result.attendance);
+		} catch (err) {
+			const apiErr = extractApiError(err);
+			_detailError.set(apiErr.fields ?? apiErr.message);
+		} finally {
+			_detailLoading.set(false);
+		}
+	}
+
 	function clearError() {
 		_error.set(null);
 	}
 
+	function clearDetail() {
+		_currentAttendance.set(null);
+		_detailError.set(null);
+	}
+
 	return {
 		subscribe: state.subscribe,
+		detail: { subscribe: detailState.subscribe },
 		load,
-		clearError
+		getAttendance,
+		clearError,
+		clearDetail
 	};
 }
 
