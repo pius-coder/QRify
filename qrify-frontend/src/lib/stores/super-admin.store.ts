@@ -1,8 +1,5 @@
 import { writable, derived } from 'svelte/store';
-import type {
-	CompanyListItem,
-	PaginationMeta
-} from '$lib/types/super-admin.types';
+import type { CompanyListItem, PaginationMeta } from '$lib/types/super-admin.types';
 import { extractApiError } from '$lib/utils/api-errors';
 import * as superAdminApi from '$lib/api/super-admin.api';
 
@@ -34,7 +31,12 @@ function createCompaniesStore() {
 		})
 	);
 
-	async function load(params?: { search?: string; status?: string; page?: number; limit?: number }) {
+	async function load(params?: {
+		search?: string;
+		status?: string;
+		page?: number;
+		limit?: number;
+	}) {
 		_isLoading.set(true);
 		_error.set(null);
 		try {
@@ -55,9 +57,7 @@ function createCompaniesStore() {
 		_isSuccess.set(false);
 		try {
 			await superAdminApi.updateCompanyStatus(id, status);
-			_companies.update((list) =>
-				list.map((c) => (c.id === id ? { ...c, status } : c))
-			);
+			_companies.update((list) => list.map((c) => (c.id === id ? { ...c, status } : c)));
 			_isSuccess.set(true);
 			return true;
 		} catch (err) {
