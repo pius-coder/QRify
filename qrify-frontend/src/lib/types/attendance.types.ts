@@ -18,6 +18,16 @@ export interface AttendanceResponse {
 	createdAt: string;
 	updatedAt: string;
 }
+export interface ScanEventInfo {
+	id: string;
+	eventType: string;
+	scannedAt: string;
+	result: string;
+}
+
+export interface AttendanceDetailResponse extends AttendanceResponse {
+	events: ScanEventInfo[];
+}
 
 export interface ScanEventInfo {
 	id: string;
