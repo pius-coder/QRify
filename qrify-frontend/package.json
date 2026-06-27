@@ -47,6 +47,7 @@
 	"dependencies": {
 		"bits-ui": "^2.18.1",
 		"embla-carousel-svelte": "^8.6.0",
+		"jsqr": "^1.4.0",
 		"qrcode": "^1.5.4",
 		"svelte-sonner": "^1.1.1",
 		"vaul-svelte": "^0.3.2"
