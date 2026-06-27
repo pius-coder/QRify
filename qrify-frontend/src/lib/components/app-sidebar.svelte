@@ -29,7 +29,8 @@
 			{ label: 'Work Schedule', icon: ClockAfternoon, href: '/admin/schedule' }
 		],
 		EMPLOYEE: [
-			{ label: 'Dashboard', icon: HouseSimple, href: '/employee/dashboard' }
+			{ label: 'Dashboard', icon: HouseSimple, href: '/employee/dashboard' },
+			{ label: 'Scanner', icon: QrCode, href: '/employee/scan' }
 		],
 		SUPER_ADMIN: [
 			{ label: 'Dashboard', icon: HouseSimple, href: '/super-admin/dashboard' },
