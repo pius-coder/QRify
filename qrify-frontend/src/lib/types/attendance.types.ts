@@ -18,6 +18,16 @@ export interface AttendanceResponse {
 	createdAt: string;
 	updatedAt: string;
 }
+export interface ScanEventInfo {
+	id: string;
+	eventType: string;
+	scannedAt: string;
+	result: string;
+}
+
+export interface AttendanceDetailResponse extends AttendanceResponse {
+	events: ScanEventInfo[];
+}
 
 export interface PaginationMeta {
 	page: number;
@@ -36,6 +46,58 @@ export interface ListAttendancesDTO {
 	search?: string;
 	page?: number;
 	limit?: number;
+}
+
+export interface AttendanceDetailResponseData {
+	attendance: AttendanceDetailResponse;
+}
+
+export interface AttendanceRecordResponse {
+	id: string;
+	workDate: string;
+	arrivalAt: string | null;
+	breakStartAt: string | null;
+	breakEndAt: string | null;
+	departureAt: string | null;
+	status: string;
+	lateMinutes: number;
+	breakMinutes: number;
+	workedMinutes: number;
+	overtimeMinutes: number;
+}
+
+export interface ScanEventResponse {
+	id: string;
+	eventType: string;
+	scannedAt: string;
+	result: string;
+}
+
+export interface TodayAttendanceResponse {
+	date: string;
+	attendance: AttendanceRecordResponse | null;
+	scanEvents: ScanEventResponse[];
+	nextExpectedEvent: string | null;
+}
+
+export interface EmployeeAttendanceListResponse {
+	attendances: AttendanceRecordResponse[];
+	total: number;
+}
+
+export interface EmployeeAttendanceDetailResponse {
+	attendance: AttendanceRecordResponse | null;
+	scanEvents: ScanEventResponse[];
+}
+
+export interface AttendanceSummaryResponse {
+	totalDays: number;
+	presentDays: number;
+	lateDays: number;
+	absentDays: number;
+	totalLateMinutes: number;
+	totalWorkedMinutes: number;
+	totalOvertimeMinutes: number;
 }
 
 export const ATTENDANCE_STATUS_LABELS: Record<string, string> = {
