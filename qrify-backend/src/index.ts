@@ -22,6 +22,7 @@ import { SqliteScheduleRepository } from './database/repositories/sqlite/sqlite-
 import { SqliteScanEventRepository } from './database/repositories/sqlite/sqlite-scan-event.repository'
 import { SqliteUserRepository } from './database/repositories/sqlite/sqlite-user.repository'
 import { ClockService } from './services/clock.service'
+import { createMeRouter } from './modules/me/me.routes'
 
 const app = new Hono()
 
@@ -49,6 +50,7 @@ app.route('/api/v1/public/companies', createPublicQrRouter())
 app.route('/api/v1/employees', createEmployeesRouter())
 app.route('/api/v1/super-admin', createSuperAdminRouter())
 app.route('/api/v1/company/statistics', createStatisticsRouter())
+app.route('/api/v1/me', createMeRouter())
 app.route('/api/v1/scans', createScansRouter())
 app.route('/api/v1/attendances', createAttendancesRouter())
 

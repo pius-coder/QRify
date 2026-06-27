@@ -19,6 +19,7 @@ export interface AttendanceData {
 export interface AttendanceRepository {
   findById(id: string): Promise<AttendanceData | null>
   findByUserAndDate(userId: string, workDate: string): Promise<AttendanceData | null>
+  findByUserAndDateRange(userId: string, startDate: string, endDate: string): Promise<AttendanceData[]>
   create(data: Omit<AttendanceData, 'id' | 'created_at' | 'updated_at'>): Promise<AttendanceData>
   update(id: string, data: Partial<AttendanceData>): Promise<AttendanceData | null>
   findByCompanyAndDate(companyId: string, workDate: string): Promise<AttendanceData[]>
