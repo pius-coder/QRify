@@ -16,6 +16,7 @@ export const EVENT_TYPE_LABELS: Record<string, string> = {
 	DEPARTURE: 'Departure'
 };
 
+
 export const SCAN_RESULT_LABELS: Record<string, string> = {
 	ACCEPTED: 'Accepted',
 	DUPLICATE: 'Duplicate',
@@ -26,3 +27,4 @@ export const SCAN_RESULT_LABELS: Record<string, string> = {
 	COMPANY_SUSPENDED: 'Company Suspended',
 	INVALID_TOKEN: 'Invalid Token'
 };
+

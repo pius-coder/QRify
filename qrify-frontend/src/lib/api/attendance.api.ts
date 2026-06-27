@@ -1,5 +1,9 @@
 import { apiGet } from './api-client';
-import type { AttendanceListResponseData, ListAttendancesDTO } from '$lib/types/attendance.types';
+import type {
+	AttendanceListResponseData,
+	AttendanceDetailResponseData,
+	ListAttendancesDTO
+} from '$lib/types/attendance.types';
 
 export async function listAttendances(
 	params?: ListAttendancesDTO
@@ -12,4 +16,7 @@ export async function listAttendances(
 	if (params?.limit) searchParams.set('limit', String(params.limit));
 	const qs = searchParams.toString();
 	return apiGet(`/attendances${qs ? `?${qs}` : ''}`);
+}
+export async function getAttendance(id: string): Promise<AttendanceDetailResponseData> {
+	return apiGet(`/attendances/${id}`);
 }

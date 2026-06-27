@@ -10,6 +10,7 @@
 		ChartBar,
 		Users,
 		ClockAfternoon,
+		CalendarCheck,
 		QrCode,
 		SignOut,
 		UserCircle
@@ -26,7 +27,8 @@
 			{ label: 'Dashboard', icon: HouseSimple, href: '/admin/dashboard' },
 			{ label: 'My Company', icon: Buildings, href: '/admin/company' },
 			{ label: 'Employees', icon: Users, href: '/admin/employees' },
-			{ label: 'Work Schedule', icon: ClockAfternoon, href: '/admin/schedule' }
+			{ label: 'Work Schedule', icon: ClockAfternoon, href: '/admin/schedule' },
+			{ label: 'Attendances', icon: CalendarCheck, href: '/admin/attendance' }
 		],
 		EMPLOYEE: [
 			{ label: 'Dashboard', icon: HouseSimple, href: '/employee/dashboard' },
@@ -58,12 +60,14 @@
 
 	<Sidebar.SidebarContent>
 		<Sidebar.SidebarGroup>
-			<Sidebar.SidebarGroupLabel class="group-data-[collapsible=icon]:hidden">Navigation</Sidebar.SidebarGroupLabel>
+			<Sidebar.SidebarGroupLabel class="group-data-[collapsible=icon]:hidden"
+				>Navigation</Sidebar.SidebarGroupLabel
+			>
 			<Sidebar.SidebarMenu>
 				{#each navItems as item (item.href)}
 					<Sidebar.SidebarMenuItem>
 						<Sidebar.SidebarMenuButton
-							isActive={$page.url.pathname === item.href}
+							isActive={$page.url.pathname === item.href || $page.url.pathname.startsWith(item.href + '/')}
 							onclick={() => goto(item.href)}
 							tooltipContent={item.label}
 						>
@@ -79,16 +83,15 @@
 	<Sidebar.SidebarFooter>
 		<Sidebar.SidebarMenu>
 			<Sidebar.SidebarMenuItem>
-				<div class="group-data-[collapsible=icon]:hidden flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground">
+				<div
+					class="group-data-[collapsible=icon]:hidden flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground"
+				>
 					<UserCircle class="size-4 shrink-0" />
-					<span class="truncate">{($auth.user?.email ?? '')}</span>
+					<span class="truncate">{$auth.user?.email ?? ''}</span>
 				</div>
 			</Sidebar.SidebarMenuItem>
 			<Sidebar.SidebarMenuItem>
-				<Sidebar.SidebarMenuButton
-					onclick={handleLogout}
-					tooltipContent="Sign out"
-				>
+				<Sidebar.SidebarMenuButton onclick={handleLogout} tooltipContent="Sign out">
 					<SignOut class="size-4 shrink-0" />
 					<span>Sign out</span>
 				</Sidebar.SidebarMenuButton>
