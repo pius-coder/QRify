@@ -84,7 +84,7 @@ export class MeService {
     }
 
     return {
-      attendance: attendance ? toAttendanceRecordResponse(attendance) : null,
+      attendance: toAttendanceRecordResponse(attendance),
       scanEvents: scanEvents.map(toScanEventResponse),
     }
   }
