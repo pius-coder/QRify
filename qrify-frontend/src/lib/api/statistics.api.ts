@@ -7,14 +7,14 @@ import type {
 } from '$lib/types/statistics.types';
 
 export async function getDashboard(): Promise<DashboardResponse> {
-	return apiGet('/company/statistics/dashboard');
+	return apiGet('/statistics/dashboard');
 }
 
 export async function getPeriodStats(
 	startDate: string,
 	endDate: string
 ): Promise<PeriodStatsResponse> {
-	return apiGet(`/company/statistics/attendance?startDate=${startDate}&endDate=${endDate}`);
+	return apiGet(`/statistics/attendance?startDate=${startDate}&endDate=${endDate}`);
 }
 
 export async function getRankings(
@@ -22,9 +22,9 @@ export async function getRankings(
 	startDate: string,
 	endDate: string
 ): Promise<RankingsResponse> {
-	return apiGet(`/company/statistics/rankings?type=${type}&startDate=${startDate}&endDate=${endDate}`);
+	return apiGet(`/statistics/rankings?type=${type}&startDate=${startDate}&endDate=${endDate}`);
 }
 
 export async function getWeeklyReport(year: number, week: number): Promise<WeeklyReportResponse> {
-	return apiGet(`/company/statistics/reports/weekly?year=${year}&week=${week}`);
+	return apiGet(`/statistics/reports/weekly?year=${year}&week=${week}`);
 }
