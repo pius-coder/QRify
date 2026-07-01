@@ -32,6 +32,9 @@
 		],
 		EMPLOYEE: [
 			{ label: 'Dashboard', icon: HouseSimple, href: '/employee/dashboard' },
+			{ label: 'History', icon: ClockAfternoon, href: '/employee/history' },
+			{ label: 'Stats', icon: ChartBar, href: '/employee/stats' },
+			{ label: 'Profile', icon: UserCircle, href: '/employee/profile' },
 			{ label: 'Scanner', icon: QrCode, href: '/employee/scan' }
 		],
 		SUPER_ADMIN: [
@@ -67,7 +70,8 @@
 				{#each navItems as item (item.href)}
 					<Sidebar.SidebarMenuItem>
 						<Sidebar.SidebarMenuButton
-							isActive={$page.url.pathname === item.href || $page.url.pathname.startsWith(item.href + '/')}
+							isActive={$page.url.pathname === item.href ||
+								$page.url.pathname.startsWith(item.href + '/')}
 							onclick={() => goto(item.href)}
 							tooltipContent={item.label}
 						>
